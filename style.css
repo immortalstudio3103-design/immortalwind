@@ -1,155 +1,137 @@
+/* --- Global Styles & Typography --- */
 :root {
-    --primary-color: #2563eb;
-    --primary-hover: #1d4ed8;
-    --secondary-color: #e5e7eb;
-    --secondary-hover: #d1d5db;
-    --danger-color: #ef4444;
-    --danger-hover: #dc2626;
-    --text-main: #1f2937;
-    --text-light: #6b7280;
-    --bg-color: #f3f4f6;
-    --card-bg: #ffffff;
+    /* Using your provided palette */
+    --deep-navy: #00072D;
+    --midnight-blue: #051650;
+    --royal-blue: #0A2472;
+    --active-blue: #123499;
+    --bright-blue: #1A43BF;
+    
+    --glass-white: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --text-main: #f9fafb;
+    --text-muted: #9ca3af;
 }
 
 * {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 body {
-    background-color: var(--bg-color);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    /* Radial gradient using your provided deep navy and midnight blue */
+    background: radial-gradient(circle at top right, var(--midnight-blue), var(--deep-navy));
     color: var(--text-main);
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    margin: 0;
+    line-height: 1.6;
 }
 
-.app-container {
+/* --- Glassmorphism Container --- */
+.container {
+    background: var(--glass-white);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 3rem;
     width: 100%;
-    max-width: 500px;
-    padding: 20px;
+    max-width: 450px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-.screen {
-    display: none;
+/* --- Typography --- */
+h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    /* Gradient heading using the lighter side of your palette */
+    background: linear-gradient(to right, var(--bright-blue), var(--active-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-.screen.active {
-    display: block;
-    animation: fadeIn 0.4s ease-in-out;
+p {
+    color: var(--text-muted);
+    margin-bottom: 2rem;
 }
 
-.card {
-    background-color: var(--card-bg);
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-h2 {
-    margin-top: 0;
-    color: var(--primary-color);
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
+/* --- Forms & Inputs --- */
 label {
     display: block;
-    margin-bottom: 5px;
+    font-size: 0.875rem;
     font-weight: 500;
-}
-
-input[type="email"],
-input[type="password"],
-input[type="file"] {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-}
-
-.auth-buttons, .action-buttons, .upload-area {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.btn {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.2s;
-    flex: 1;
-}
-
-.btn.primary {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.btn.primary:hover { background-color: var(--primary-hover); }
-
-.btn.secondary {
-    background-color: var(--secondary-color);
+    margin-bottom: 0.5rem;
     color: var(--text-main);
 }
 
-.btn.secondary:hover { background-color: var(--secondary-hover); }
-
-.btn.danger {
-    background-color: var(--danger-color);
-    color: white;
-}
-
-.btn.danger:hover { background-color: var(--danger-hover); }
-
-.full-width {
+input[type="email"], 
+input[type="password"],
+input[type="file"] {
     width: 100%;
-    margin-top: 20px;
+    padding: 0.75rem 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: white;
+    transition: all 0.2s ease;
 }
 
-.hidden {
-    display: none !important;
+input:focus {
+    outline: none;
+    border-color: var(--bright-blue);
+    box-shadow: 0 0 0 4px rgba(26, 67, 191, 0.2);
 }
 
-.error-message {
-    color: var(--danger-color);
-    font-size: 0.9em;
-    margin-top: 10px;
-    text-align: center;
+/* --- Buttons --- */
+.btn-primary {
+    width: 100%;
+    padding: 0.875rem;
+    background: var(--royal-blue); /* Base primary color from your palette */
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.content-box, .results-box, .option-card {
-    background-color: #f8fafc;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    border: 1px solid #e2e8f0;
+.btn-primary:hover {
+    background: var(--active-blue); /* Lighter blue on hover */
+    transform: translateY(-1px);
 }
 
-.result-list {
-    list-style-type: none;
-    padding: 0;
+.btn-secondary {
+    width: 100%;
+    padding: 0.875rem;
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    border-radius: 12px;
+    font-weight: 600;
+    margin-top: 0.75rem;
+    cursor: pointer;
 }
 
-.result-list li {
-    margin-bottom: 8px;
-    font-size: 1.1em;
+.btn-secondary:hover {
+    background: var(--glass-white);
 }
 
-.prediction-box {
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 2px dashed #cbd5e1;
+/* --- Utility Classes --- */
+.hidden { display: none !important; }
+
+#analysis-results {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 1.5rem;
+    border-radius: 16px;
+    margin-top: 2rem;
+    border: 1px solid var(--glass-border);
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+.result-value { 
+    font-weight: 700; 
+    color: #34d399; /* Keeping green for monetary values for clarity */
 }
