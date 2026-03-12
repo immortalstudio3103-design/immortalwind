@@ -1,10 +1,10 @@
-// 1. Initialize Supabase (Ensure this only happens ONCE)
+// --- Supabase Initialization ---
+// Using 'db' as the variable name to avoid naming collisions
 const supabaseUrl = 'https://xzqppxkqsayucaqfoksw.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6cXBweGtxc2F5dWNhcWZva3N3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNjMxNTEsImV4cCI6MjA4ODczOTE1MX0.Q479ge9wTVgl7ui0tILVH9jE2Wfo2-h7TbNvfjM4k2c';
 
-// Use 'var' or just assignment if you suspect double-loading, 
-// but usually 'const' is fine if the HTML is fixed.
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+// This is the line where we change the name to 'db'
+const db = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 // --- DOM Elements ---
 const screens = {
@@ -21,6 +21,7 @@ const fileInput = document.getElementById('debt-document');
 const analysisResults = document.getElementById('analysis-results');
 const btnNextToResolution = document.getElementById('btn-next-to-resolution');
 
+// --- Navigation Logic ---
 function switchScreen(targetScreenKey) {
     Object.values(screens).forEach(screen => {
         screen.classList.remove('active');
@@ -30,12 +31,16 @@ function switchScreen(targetScreenKey) {
     screens[targetScreenKey].classList.add('active');
 }
 
-// --- DATABASE FUNCTION ---
+// --- Database Logic ---
 async function saveDebtData(amount, rate, status) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    const { data: { user } } = await db.auth.getUser();
 
-    const { error } = await supabase
+    if (!user) {
+        console.error("No user found.");
+        return;
+    }
+
+    const { error } = await db
       .from('debt_records')
       .insert([{ 
           user_id: user.id, 
@@ -44,56 +49,81 @@ async function saveDebtData(amount, rate, status) {
           loan_status: status 
       }]);
 
-    if (error) console.error('Data Save Error:', error);
-    else console.log('Data saved to Supabase table!');
+    if (error) console.error('Database Error:', error);
+    else console.log('Successfully saved to debt_records table!');
 }
 
-// --- AUTH LOGIC ---
+// --- Authentication Logic ---
 document.getElementById('btn-signup').addEventListener('click', async () => {
-    const { data, error } = await supabase.auth.signUp({ 
+    authMessage.textContent = "Signing up...";
+    const { data, error } = await db.auth.signUp({ 
         email: emailInput.value, 
         password: passwordInput.value 
     });
-    if (error) authMessage.textContent = error.message;
-    else switchScreen('overview');
+    
+    if (error) {
+        authMessage.textContent = error.message;
+    } else {
+        switchScreen('overview');
+    }
 });
 
 document.getElementById('btn-login').addEventListener('click', async () => {
-    const { data, error } = await supabase.auth.signInWithPassword({ 
+    authMessage.textContent = "Logging in...";
+    const { data, error } = await db.auth.signInWithPassword({ 
         email: emailInput.value, 
         password: passwordInput.value 
     });
-    if (error) authMessage.textContent = error.message;
-    else switchScreen('overview');
+    
+    if (error) {
+        authMessage.textContent = error.message;
+    } else {
+        switchScreen('overview');
+    }
 });
 
-// --- ANALYSIS LOGIC ---
+// --- Analysis Logic ---
 document.getElementById('btn-analyze').addEventListener('click', async () => {
-    if (!fileInput.files.length) return alert("Upload a document.");
+    if (!fileInput.files.length) {
+        alert("Please upload a document first.");
+        return;
+    }
 
     const btn = document.getElementById('btn-analyze');
     btn.textContent = "Analyzing...";
-    
-    // Mocking the analysis values
-    const principal = 35000;
-    const rate = 5.5;
-    const status = "In Repayment";
+    btn.disabled = true;
 
     setTimeout(async () => {
-        document.getElementById('res-principal').textContent = principal.toLocaleString();
-        document.getElementById('res-rate').textContent = rate;
-        document.getElementById('res-status').textContent = status;
+        const principal = 35000;
+        const interestRate = 5.5; 
+        const status = "In Repayment";
         
+        const futureValue = principal * Math.pow((1 + (interestRate / 100)), 5);
+
+        document.getElementById('res-principal').textContent = principal.toLocaleString();
+        document.getElementById('res-rate').textContent = interestRate;
+        document.getElementById('res-status').textContent = status;
+        document.getElementById('res-future').textContent = futureValue.toFixed(2).toLocaleString();
+
         analysisResults.classList.remove('hidden');
         btnNextToResolution.classList.remove('hidden');
+        
         btn.textContent = "Analyze Document";
+        btn.disabled = false;
 
-        // ACTUALLY SEND TO DATABASE
-        await saveDebtData(principal, rate, status);
+        // Save to your database table using the 'db' variable
+        await saveDebtData(principal, interestRate, status);
     }, 1500);
 });
 
-// Navigation
+// --- Remaining Navigation ---
 document.getElementById('btn-next-to-upload').addEventListener('click', () => switchScreen('upload'));
 btnNextToResolution.addEventListener('click', () => switchScreen('resolution'));
 document.getElementById('btn-back-overview').addEventListener('click', () => switchScreen('overview'));
+
+document.getElementById('btn-clear-info').addEventListener('click', () => {
+    fileInput.value = "";
+    analysisResults.classList.add('hidden');
+    btnNextToResolution.classList.add('hidden');
+    alert("Data cleared.");
+});
