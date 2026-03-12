@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debt Navigator</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="app-container">
+        
+        <section id="screen-auth" class="screen active">
+            <div class="card">
+                <h2>Debt Navigator</h2>
+                <p>Sign in or create an account to track and resolve your college debt.</p>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="you@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <div class="auth-buttons">
+                    <button id="btn-login" class="btn primary">Log In</button>
+                    <button id="btn-signup" class="btn secondary">Sign Up</button>
+                </div>
+                <p id="auth-message" class="error-message"></p>
+            </div>
+        </section>
+
+        <section id="screen-overview" class="screen hidden">
+            <div class="card">
+                <h2>Understanding College Debt</h2>
+                <div class="content-box">
+                    <p>Student debt is an investment in your future, but without careful management, interest can compound and extend the life of the loan. </p>
+                    <p>Federal and private loans function differently. Federal loans often offer income-driven repayment plans and forgiveness options, whereas private loans are strictly bound by the lender's terms. Understanding your principal balance, current interest rates, and loan servicer is the first step to taking back control.</p>
+                </div>
+                <button id="btn-next-to-upload" class="btn primary full-width">Next Page</button>
+            </div>
+        </section>
+
+        <section id="screen-upload" class="screen hidden">
+            <div class="card">
+                <h2>Analyze Your Debt</h2>
+                <p>Upload your financial records or college documentation to generate a status report and prediction.</p>
+                
+                <div class="upload-area">
+                    <input type="file" id="debt-document" accept=".pdf, .jpg, .png">
+                    <button id="btn-analyze" class="btn secondary">Analyze Document</button>
+                </div>
+
+                <div id="analysis-results" class="results-box hidden">
+                    <h3>Analysis Complete</h3>
+                    <ul class="result-list">
+                        <li><strong>Current Principal:</strong> $<span id="res-principal">0.00</span></li>
+                        <li><strong>Interest Rate:</strong> <span id="res-rate">0</span>%</li>
+                        <li><strong>Status:</strong> <span id="res-status">Pending</span></li>
+                    </ul>
+                    <div class="prediction-box">
+                        <h4>5-Year Prediction (If Unpaid)</h4>
+                        <p>Due to compounding interest, your debt will grow to approximately <strong>$<span id="res-future">0.00</span></strong>.</p>
+                    </div>
+                </div>
+
+                <button id="btn-next-to-resolution" class="btn primary full-width hidden">Next Page</button>
+            </div>
+        </section>
+
+        <section id="screen-resolution" class="screen hidden">
+            <div class="card">
+                <h2>Your Action Plan</h2>
+                <p>Based on the analysis, here are your streamlined options to mitigate and eliminate your debt.</p>
+                
+                <div class="options-container">
+                    <div class="option-card">
+                        <h4>1. Income-Driven Repayment (IDR)</h4>
+                        <p>Caps your monthly payments based on your income and family size. Best for federal loans to prevent defaulting.</p>
+                    </div>
+                    <div class="option-card">
+                        <h4>2. Refinancing</h4>
+                        <p>Consolidate multiple high-interest private loans into a single loan with a lower interest rate.</p>
+                    </div>
+                    <div class="option-card">
+                        <h4>3. Public Service Loan Forgiveness (PSLF)</h4>
+                        <p>If you work for a government or non-profit organization, your remaining balance may be forgiven after 120 qualifying payments.</p>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="btn-clear-info" class="btn danger">Clear Information</button>
+                    <button id="btn-back-overview" class="btn secondary">Back to Overview</button>
+                </div>
+            </div>
+        </section>
+
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
