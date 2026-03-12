@@ -1,7 +1,9 @@
-// --- Supabase Initialization ---
-// Using the client injected via CDN in index.html
+// 1. Initialize Supabase (Ensure this only happens ONCE)
 const supabaseUrl = 'https://xzqppxkqsayucaqfoksw.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6cXBweGtxc2F5dWNhcWZva3N3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNjMxNTEsImV4cCI6MjA4ODczOTE1MX0.Q479ge9wTVgl7ui0tILVH9jE2Wfo2-h7TbNvfjM4k2c';
+
+// Use 'var' or just assignment if you suspect double-loading, 
+// but usually 'const' is fine if the HTML is fixed.
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 // --- DOM Elements ---
@@ -12,17 +14,13 @@ const screens = {
     resolution: document.getElementById('screen-resolution')
 };
 
-// Auth Elements
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
 const authMessage = document.getElementById('auth-message');
-
-// Analysis Elements
 const fileInput = document.getElementById('debt-document');
 const analysisResults = document.getElementById('analysis-results');
 const btnNextToResolution = document.getElementById('btn-next-to-resolution');
 
-// --- Navigation Logic ---
 function switchScreen(targetScreenKey) {
     Object.values(screens).forEach(screen => {
         screen.classList.remove('active');
@@ -32,98 +30,70 @@ function switchScreen(targetScreenKey) {
     screens[targetScreenKey].classList.add('active');
 }
 
-// --- Authentication Logic ---
+// --- DATABASE FUNCTION ---
+async function saveDebtData(amount, rate, status) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase
+      .from('debt_records')
+      .insert([{ 
+          user_id: user.id, 
+          principal_amount: amount, 
+          interest_rate: rate, 
+          loan_status: status 
+      }]);
+
+    if (error) console.error('Data Save Error:', error);
+    else console.log('Data saved to Supabase table!');
+}
+
+// --- AUTH LOGIC ---
 document.getElementById('btn-signup').addEventListener('click', async () => {
-    const email = emailInput.value;
-    const password = passwordInput.value;
-    
-    authMessage.textContent = "Signing up...";
-    
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    
-    if (error) {
-        authMessage.textContent = error.message;
-    } else {
-        // Successfully signed up and logged in
-        authMessage.textContent = "";
-        switchScreen('overview');
-    }
+    const { data, error } = await supabase.auth.signUp({ 
+        email: emailInput.value, 
+        password: passwordInput.value 
+    });
+    if (error) authMessage.textContent = error.message;
+    else switchScreen('overview');
 });
 
 document.getElementById('btn-login').addEventListener('click', async () => {
-    const email = emailInput.value;
-    const password = passwordInput.value;
-    
-    authMessage.textContent = "Logging in...";
-    
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    
-    if (error) {
-        authMessage.textContent = error.message;
-    } else {
-        authMessage.textContent = "";
-        switchScreen('overview');
-    }
+    const { data, error } = await supabase.auth.signInWithPassword({ 
+        email: emailInput.value, 
+        password: passwordInput.value 
+    });
+    if (error) authMessage.textContent = error.message;
+    else switchScreen('overview');
 });
 
-// --- Screen 2 to 3 ---
-document.getElementById('btn-next-to-upload').addEventListener('click', () => {
-    switchScreen('upload');
-});
+// --- ANALYSIS LOGIC ---
+document.getElementById('btn-analyze').addEventListener('click', async () => {
+    if (!fileInput.files.length) return alert("Upload a document.");
 
-// --- Document Analysis Logic (Mocked) ---
-document.getElementById('btn-analyze').addEventListener('click', () => {
-    if (!fileInput.files.length) {
-        alert("Please upload a document first.");
-        return;
-    }
-
-    // Simulate processing time for document parsing
     const btn = document.getElementById('btn-analyze');
     btn.textContent = "Analyzing...";
-    btn.disabled = true;
+    
+    // Mocking the analysis values
+    const principal = 35000;
+    const rate = 5.5;
+    const status = "In Repayment";
 
-    setTimeout(() => {
-        // Mock data that would normally be extracted by a backend OCR/NLP service
-        const principal = 35000;
-        const interestRate = 5.5; 
-        
-        // Compound interest calculation for 5 years: A = P(1 + r/n)^(nt)
-        // Simplified assuming annual compounding
-        const futureValue = principal * Math.pow((1 + (interestRate / 100)), 5);
-
-        // Populate UI
+    setTimeout(async () => {
         document.getElementById('res-principal').textContent = principal.toLocaleString();
-        document.getElementById('res-rate').textContent = interestRate;
-        document.getElementById('res-status').textContent = "In Repayment";
-        document.getElementById('res-future').textContent = futureValue.toFixed(2).toLocaleString();
-
-        // Show results and next button
+        document.getElementById('res-rate').textContent = rate;
+        document.getElementById('res-status').textContent = status;
+        
         analysisResults.classList.remove('hidden');
         btnNextToResolution.classList.remove('hidden');
-        
         btn.textContent = "Analyze Document";
-        btn.disabled = false;
+
+        // ACTUALLY SEND TO DATABASE
+        await saveDebtData(principal, rate, status);
     }, 1500);
 });
 
-// --- Screen 3 to 4 ---
-btnNextToResolution.addEventListener('click', () => {
-    switchScreen('resolution');
-});
-
-// --- Screen 4 Logic ---
-document.getElementById('btn-back-overview').addEventListener('click', () => {
-    // Navigates back to the OVERVIEW screen (Screen 2), NOT the auth screen
-    switchScreen('overview');
-});
-
-document.getElementById('btn-clear-info').addEventListener('click', () => {
-    // Reset file input
-    fileInput.value = "";
-    // Hide results and next button on upload screen
-    analysisResults.classList.add('hidden');
-    btnNextToResolution.classList.add('hidden');
-    
-    alert("Your uploaded document and analysis data have been cleared.");
-});
+// Navigation
+document.getElementById('btn-next-to-upload').addEventListener('click', () => switchScreen('upload'));
+btnNextToResolution.addEventListener('click', () => switchScreen('resolution'));
+document.getElementById('btn-back-overview').addEventListener('click', () => switchScreen('overview'));
